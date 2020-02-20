@@ -34,6 +34,15 @@ class NerModel(tf.keras.Model):
 
         if labels is not None:
             label_sequences = tf.convert_to_tensor(labels, dtype=tf.int32)
+            # 之前使用 tf.contrib.crf.crf_log_likelihood
+            # 4个参数：
+#             inputs：batch_size x max_seq_len x num_tags的三维矩阵，即是上一层结果的输入。
+#             tag_indices：batch_size x max_seq_len的二维矩阵，是标签。
+#             sequence_lengths：batch_size向量，序列长度。
+#             transition_params：num_tags x num_tags的状态转移矩阵，可以为空
+            # 2个输出：
+#             log_likelihood：对数似然值。
+#             transition_params：状态转移矩阵
             log_likelihood, self.transition_params = tf_ad.text.crf_log_likelihood(logits, label_sequences, text_lens)
             self.transition_params = tf.Variable(self.transition_params, trainable=False)
             return logits, text_lens, log_likelihood
